@@ -1,0 +1,4 @@
+ID Rachetă;ID Asteroid;Resursă;Cantitate extrasă (kg);Combustibil consumat (kg);Cost combustibil ($);Profit brut ($);Profit net ($)
+R2;A1;Aur;1500;120;216;900000;899784
+R2;A2;Fier;3000;720;1296;360000;358704
+R2;A2;Fier&Cupru;2320;720;1296;360400;359104

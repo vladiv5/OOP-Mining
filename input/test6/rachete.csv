@@ -1,0 +1,5 @@
+ID Rachetă;Capacitate (kg);Consum combustibil (kg/1000 km);Combustibil disponibil (kg);Preț combustibil ($/kg)
+R1;70000;50;750000;2.0
+R2;80000;200;600000;2.4
+R3;75000;320;500000;1.6
+R4;30000;180;400000;3.0

@@ -1,0 +1,98 @@
+#include "racheta.h"
+
+Racheta::Racheta() : m_id(""), m_capacitate(0), m_consumCombustibil(0), m_combustibilDisponibil(0), m_pretCombustibil(0.0f)
+{
+}
+
+// Constructor
+Racheta::Racheta(std::string id, int capacitate, int consumCombustibil, int combustibilDisponibil, float pretCombustibil)
+    : m_id(id), m_capacitate(capacitate), m_consumCombustibil(consumCombustibil), m_combustibilDisponibil(combustibilDisponibil), m_pretCombustibil(pretCombustibil)
+{
+}
+
+// Constructor that reads data from a CSV file
+Racheta::Racheta(const std::string& line)
+{
+    std::stringstream s(line); // transform linia intr-un flux de date
+    std::string value; // variabila in care retin temporar valorile citite
+
+    std::getline(s, m_id, ';'); // citesc valoarea pt id
+
+    std::getline(s, value, ';'); // citesc valorile pt capacitate
+    m_capacitate = std::stoi(value); // convertesc valoarea citita dintr-un string in int
+
+    std::getline(s, value, ';'); // citesc valoarea pt consumCombustibil
+    m_consumCombustibil = std::stoi(value); // convertesc valoarea citita dintr-un string in int
+
+    std::getline(s, value, ';'); // citesc valoarea pt combustibilDisponibil
+    m_combustibilDisponibil = std::stoi(value); // convertesc valoarea citita dintr-un string in int
+
+    std::getline(s, value, ';'); // citesc valoarea pt pretCombustibil
+    m_pretCombustibil = std::stof(value); // convertesc valoarea citita dintr-un string in float
+}
+
+// Assignment operator
+Racheta& Racheta::operator=(const Racheta& other)
+{
+    if (this != &other)
+    {
+        m_id = other.m_id;
+        m_capacitate = other.m_capacitate;
+        m_consumCombustibil = other.m_consumCombustibil;
+        m_combustibilDisponibil = other.m_combustibilDisponibil;
+        m_pretCombustibil = other.m_pretCombustibil;
+    }
+    return *this;
+}
+
+// Getters
+std::string Racheta::getId() const
+{
+    return m_id;
+}
+
+int Racheta::getCapacitate() const
+{
+    return m_capacitate;
+}
+
+int Racheta::getConsumCombustibil() const
+{
+    return m_consumCombustibil;
+}
+
+int Racheta::getCombustibilDisponibil() const
+{
+    return m_combustibilDisponibil;
+}
+
+float Racheta::getPretCombustibil() const
+{
+    return m_pretCombustibil;
+}
+
+// Setters
+void Racheta::setId(std::string id)
+{
+    m_id = id;
+}
+
+void Racheta::setCapacitate(int capacitate)
+{
+    m_capacitate = capacitate;
+}
+
+void Racheta::setConsumCombustibil(int consumCombustibil)
+{
+    m_consumCombustibil = consumCombustibil;
+}
+
+void Racheta::setCombustibilDisponibil(int combustibilDisponibil)
+{
+    m_combustibilDisponibil = combustibilDisponibil;
+}
+
+void Racheta::setPretCombustibil(float pretCombustibil)
+{
+    m_pretCombustibil = pretCombustibil;
+}
