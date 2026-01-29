@@ -4,6 +4,7 @@
 #include "racheta.h"
 #include "asteroid.h"
 
+// I defined the Mission class to act as a data structure (DTO) for logging completed operations.
 class Misiune
 {
 private:

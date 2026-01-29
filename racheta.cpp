@@ -1,37 +1,41 @@
 #include "racheta.h"
 
+// Default constructor
 Racheta::Racheta() : m_id(""), m_capacitate(0), m_consumCombustibil(0), m_combustibilDisponibil(0), m_pretCombustibil(0.0f)
 {
 }
 
-// Constructor
+// Parameterized Constructor
+// I use this for initializing rockets with explicit values, useful for testing or manual creation.
 Racheta::Racheta(std::string id, int capacitate, int consumCombustibil, int combustibilDisponibil, float pretCombustibil)
     : m_id(id), m_capacitate(capacitate), m_consumCombustibil(consumCombustibil), m_combustibilDisponibil(combustibilDisponibil), m_pretCombustibil(pretCombustibil)
 {
 }
 
-// Constructor that reads data from a CSV file
+// Constructor that reads data from a CSV line
+// I implemented this to parse rocket configuration directly from a CSV string.
 Racheta::Racheta(const std::string& line)
 {
-    std::stringstream s(line); // transform linia intr-un flux de date
-    std::string value; // variabila in care retin temporar valorile citite
+    std::stringstream s(line); 
+    std::string value; 
 
-    std::getline(s, m_id, ';'); // citesc valoarea pt id
+    std::getline(s, m_id, ';'); // Parsing ID
 
-    std::getline(s, value, ';'); // citesc valorile pt capacitate
-    m_capacitate = std::stoi(value); // convertesc valoarea citita dintr-un string in int
+    std::getline(s, value, ';'); 
+    m_capacitate = std::stoi(value); // Parsing cargo capacity
 
-    std::getline(s, value, ';'); // citesc valoarea pt consumCombustibil
-    m_consumCombustibil = std::stoi(value); // convertesc valoarea citita dintr-un string in int
+    std::getline(s, value, ';'); 
+    m_consumCombustibil = std::stoi(value); // Parsing fuel consumption rate
 
-    std::getline(s, value, ';'); // citesc valoarea pt combustibilDisponibil
-    m_combustibilDisponibil = std::stoi(value); // convertesc valoarea citita dintr-un string in int
+    std::getline(s, value, ';'); 
+    m_combustibilDisponibil = std::stoi(value); // Parsing initial fuel tank
 
-    std::getline(s, value, ';'); // citesc valoarea pt pretCombustibil
-    m_pretCombustibil = std::stof(value); // convertesc valoarea citita dintr-un string in float
+    std::getline(s, value, ';'); 
+    m_pretCombustibil = std::stof(value); // Parsing fuel cost
 }
 
 // Assignment operator
+// I overloaded the assignment operator to ensure deep copying of rocket properties if needed.
 Racheta& Racheta::operator=(const Racheta& other)
 {
     if (this != &other)

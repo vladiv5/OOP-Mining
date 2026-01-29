@@ -6,14 +6,15 @@
 #include <sstream>
 #include <iostream>
 
+// I defined the 'Piata' (Market) class to manage resource prices and track global extraction stats.
 class Piata
 {
 private:
     std::vector<std::string> m_resurse;
     std::vector<int> MIN_PRET;
     std::vector<int> MAX_PRET;
-    std::vector<double> m_resursaMinata;
-    std::vector<double> m_profitBrut;
+    std::vector<double> m_resursaMinata; // Tracks total mined quantity per resource to calculate price drops.
+    std::vector<double> m_profitBrut;    // Tracks total revenue generated per resource.
 
 public:
     // Constructors

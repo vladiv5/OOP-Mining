@@ -5,6 +5,7 @@
 #include <fstream>
 #include <sstream>
 
+// I defined the Rocket class to encapsulate the properties and capabilities of the mining vehicles.
 class Racheta
 {
 private:
@@ -19,7 +20,10 @@ public:
     Racheta();
     Racheta(std::string id, int capacitate, int consumCombustibil, int combustibilDisponibil, float pretCombustibil);
     Racheta(const std::string& line);
+    
+    // I adhere to the Rule of Three/Five principles where applicable, hence the assignment operator.
     Racheta& operator=(const Racheta& other);
+    
     // Getters
     std::string getId() const;
     int getCapacitate() const;

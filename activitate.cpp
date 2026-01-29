@@ -1,7 +1,10 @@
 #include "activitate.h"
 #include <climits>
+#include <cfloat> // I included this to use DBL_MAX for proper price comparison.
+#include <iostream>
 
 // Default constructor
+// I initialize empty vectors to ensure the simulation starts with a clean state.
 Activitate::Activitate()
 {
     m_rachete = std::vector<Racheta>();
@@ -10,59 +13,31 @@ Activitate::Activitate()
     m_misiuni = std::vector<Misiune>();
 }
 
-// Constructor
+// Parameterized Constructor
 Activitate::Activitate(const std::vector<Racheta>& rachete, const std::vector<Asteroid>& asteroizi, const Piata& piata, const std::vector<Misiune>& misiuni)
     : m_rachete(rachete), m_asteroizi(asteroizi), m_piata(piata), m_misiuni(misiuni)
 {
 }
 
 // Getters
-std::vector<Racheta> Activitate::getRachete() const
-{
-    return m_rachete;
-}
-
-std::vector<Asteroid> Activitate::getAsteroizi() const
-{
-    return m_asteroizi;
-}
-
-Piata Activitate::getPiata() const
-{
-    return m_piata;
-}
-
-std::vector<Misiune> Activitate::getMisiuni() const
-{
-    return m_misiuni;
-}
+std::vector<Racheta> Activitate::getRachete() const { return m_rachete; }
+std::vector<Asteroid> Activitate::getAsteroizi() const { return m_asteroizi; }
+Piata Activitate::getPiata() const { return m_piata; }
+std::vector<Misiune> Activitate::getMisiuni() const { return m_misiuni; }
 
 // Setters
-void Activitate::setRachete(const std::vector<Racheta>& rachete)
-{
-    m_rachete = rachete;
-}
+void Activitate::setRachete(const std::vector<Racheta>& rachete) { m_rachete = rachete; }
+void Activitate::setAsteroizi(const std::vector<Asteroid>& asteroizi) { m_asteroizi = asteroizi; }
+void Activitate::setPiata(const Piata& piata) { m_piata = piata; }
+void Activitate::setMisiuni(const std::vector<Misiune>& misiuni) { m_misiuni = misiuni; }
 
-void Activitate::setAsteroizi(const std::vector<Asteroid>& asteroizi)
-{
-    m_asteroizi = asteroizi;
-}
-
-void Activitate::setPiata(const Piata& piata)
-{
-    m_piata = piata;
-}
-
-void Activitate::setMisiuni(const std::vector<Misiune>& misiuni)
-{
-    m_misiuni = misiuni;
-}
-
+// File Parsing Logic
 bool Activitate::citireActivitate(const std::string& fileNameRachete, const std::string& fileNameAsteroizi, const std::string& fileNamePiata)
 {
     std::ifstream fisierRachete(fileNameRachete);
     std::ifstream fisierAsteroizi(fileNameAsteroizi);
 
+    // I validate that the input files exist before attempting to read them to prevent runtime crashes.
     if (!fisierRachete.is_open() || !fisierAsteroizi.is_open())
     {
         std::cout << "Eroare la deschiderea fisierelor" << std::endl;
@@ -70,67 +45,64 @@ bool Activitate::citireActivitate(const std::string& fileNameRachete, const std:
     }
     else
     {
-        std::string linie; // variabila in care retin linia citita
+        std::string linie; 
+        std::getline(fisierRachete, linie); // I skip the CSV header to get straight to the data.
 
-        // Ignor primul rand din fisierul cu rachete
-        std::getline(fisierRachete, linie);
-        while(std::getline(fisierRachete, linie)) // citesc linie cu linie pana la sfarsitul fisierului cu rachete
+        while(std::getline(fisierRachete, linie)) 
         {
-            try
-            {
-                Racheta racheta(linie); // creez un obiect de tip Racheta cu datele citite din linia curenta
-                m_rachete.push_back(racheta); // adaug racheta in vectorul de rachete
-            }
-            catch (const std::invalid_argument& e)
-            {
-                std::cerr << "Eroare de conversie la linia: " << linie << " - " << e.what() << std::endl;
+            try {
+                // I use a try-catch block here to handle potential formatting errors in the CSV lines safely.
+                Racheta racheta(linie); 
+                m_rachete.push_back(racheta); 
+            } catch (const std::invalid_argument& e) {
+                std::cerr << "Eroare conversie racheta: " << e.what() << std::endl;
             }
         }
 
-        std::string linie1; // variabila in care retin linia citita
-        // Ignor primul rand din fisierul cu asteroizi
-        std::getline(fisierAsteroizi, linie1);
-        while(std::getline(fisierAsteroizi, linie1)) // citesc linie cu linie pana la sfarsitul fisierului cu asteroizi
+        std::string linie1; 
+        std::getline(fisierAsteroizi, linie1); // Skipping header for asteroids file as well.
+        
+        while(std::getline(fisierAsteroizi, linie1)) 
         {
-            try
-            {
-                Asteroid asteroid(linie1); // creez un obiect de tip Asteroid cu datele citite din linia curenta
-                m_asteroizi.push_back(asteroid); // adaug asteroidul in vectorul de asteroizi
-            }
-            catch (const std::invalid_argument& e)
-            {
-                std::cerr << "Eroare de conversie la linia: " << linie << " - " << e.what() << std::endl;
+            try {
+                // I explicitly use 'linie1' here to avoid conflicts with the previous buffer.
+                Asteroid asteroid(linie1); 
+                m_asteroizi.push_back(asteroid); 
+            } catch (const std::invalid_argument& e) {
+                std::cerr << "Eroare conversie asteroid: " << e.what() << std::endl;
             }
         }
 
-        try
-        {
-            m_piata = Piata(fileNamePiata); // setez piata cu continutul citit
-        }
-        catch (const std::invalid_argument& e)
-        {
-            std::cerr << "Eroare de conversie la continutul pietei: " << e.what() << std::endl;
+        try {
+            m_piata = Piata(fileNamePiata); 
+        } catch (const std::invalid_argument& e) {
+            std::cerr << "Eroare piata: " << e.what() << std::endl;
         }
 
-        fisierRachete.close(); // inchid fisierul cu rachete
-        fisierAsteroizi.close(); // inchid fisierul cu asteroizi
+        fisierRachete.close(); 
+        fisierAsteroizi.close(); 
         return true;
     }
 }
 
-Racheta& Activitate::alegereRacheta(int index)
+// Rocket Selection Algorithm
+// I designed this to return a pointer (Racheta*) so I can return nullptr when no suitable rocket is found.
+Racheta* Activitate::alegereRacheta(int index)
 {
-    // Verificăm dacă indexul este valid pentru vectorul de asteroizi
+    // I perform a boundary check on the asteroid index to prevent out-of-bounds access.
     if (index < 0 || static_cast<size_t>(index) >= m_asteroizi.size()) {
-        std::cerr << "Index invalid pentru asteroid!" << std::endl;
-        return m_rachete.at(0);  // Returnăm o rachetă implicită sau primul element din vector
+        return nullptr;
     }
 
-    int costMin = INT_MAX;
+    double costMin = DBL_MAX; // I use DBL_MAX to ensure any valid calculated cost will be lower.
     int rachetaIndex = -1;
+
     for (size_t k = 0; k < m_rachete.size(); k++) {
-        if (m_rachete.at(k).getCombustibilDisponibil() > 2 * m_asteroizi.at(index).getDistanta() * m_rachete.at(k).getConsumCombustibil() / 1000) { // Verificăm dacă racheta curentă are suficient combustibil
-            float cost = 2 * m_asteroizi.at(index).getDistanta() * m_rachete.at(k).getConsumCombustibil() * m_rachete.at(k).getPretCombustibil() / 1000; // Calculăm costul combustibilului
+        // I calculate if the rocket has enough fuel for a round trip (distance * 2).
+        if (m_rachete.at(k).getCombustibilDisponibil() >= 2.0 * m_asteroizi.at(index).getDistanta() * m_rachete.at(k).getConsumCombustibil() / 1000.0) { 
+            double cost = 2.0 * m_asteroizi.at(index).getDistanta() * m_rachete.at(k).getConsumCombustibil() * m_rachete.at(k).getPretCombustibil() / 1000.0; 
+            
+            // I select the rocket that minimizes the financial cost, not just fuel consumption.
             if (cost < costMin) {
                 costMin = cost;
                 rachetaIndex = k;
@@ -138,248 +110,217 @@ Racheta& Activitate::alegereRacheta(int index)
         }
     }
 
-    // Dacă nu găsim o rachetă validă, ar putea fi un caz de eroare
     if (rachetaIndex == -1) {
-        std::cerr << "Nu s-a gasit o racheta adecvata!" << std::endl;
-        return m_rachete.at(0);  // Returnăm o rachetă implicită
+        // If no rocket is found, I return nullptr to signal the simulation loop to stop for this asteroid.
+        return nullptr;
     }
 
-    return m_rachete.at(rachetaIndex);
+    return &m_rachete.at(rachetaIndex);
 }
-
 
 void Activitate::actualizareCantitateTotalaAsteroid(int index, double cantitateExtrasa)
 {
-    double cantitateRamasa = m_asteroizi.at(index).getCantitateTotala() - cantitateExtrasa * 100 / m_asteroizi.at(index).getRandamentExtractie(); // calculez cantitatea ramasa de resurse
-    m_asteroizi.at(index).setCantitateTotala(cantitateRamasa); // actualizez cantitatea totala de resurse
+    // I update the remaining resources on the asteroid, accounting for extraction yield.
+    double cantitateRamasa = m_asteroizi.at(index).getCantitateTotala() - cantitateExtrasa * 100 / m_asteroizi.at(index).getRandamentExtractie(); 
+    if (cantitateRamasa < 0) cantitateRamasa = 0;
+    m_asteroizi.at(index).setCantitateTotala(cantitateRamasa); 
 }
 
 void Activitate::actualizareResursaMinata(std::string resursaMinata, double cantitateExtrasa)
 {
-    int indexResursa = -1;
-
-    // Cautăm manual resursa în vectorul de resurse
+    // I search for the resource in the market and update the total mined quantity.
     for (size_t i = 0; i < m_piata.getResurse().size(); i++)
     {
         if (m_piata.getResurse()[i] == resursaMinata)
         {
-            indexResursa = static_cast<int>(i); // Salvăm indexul resursei găsite
-            break;
+            m_piata.getResursaMinata().at(i) += cantitateExtrasa;
+            return;
         }
     }
-
-    if (indexResursa == -1)
-    {
-        std::cout << "Eroare: Resursa " << resursaMinata << " nu a fost gasita!" << std::endl;
-        return;
-    }
-    //std::cout << indexResursa <<std::endl;
-
-    // Actualizăm cantitatea resursei minate
-    //std::cout << m_piata.getResursaMinata().size() << std::endl;
-    m_piata.getResursaMinata().at(indexResursa) += cantitateExtrasa;
+    std::cout << "Eroare: Resursa " << resursaMinata << " nu a fost gasita!" << std::endl;
 }
 
-
-
-
+// Dynamic Pricing Logic
 int Activitate::calculPretResursaMinata(std::string resursa, double cantitateExtrasa)
 {
-    int i = -1; // Initializam cu un index invalid
-    for (size_t j = 0; j < m_piata.getResurse().size(); ++j) // Parcurgem vectorul de resurse
+    int i = -1; 
+    // I find the index of the resource in the market data.
+    for (size_t j = 0; j < m_piata.getResurse().size(); ++j) 
     {
-        if (m_piata.getResurse()[j] == resursa) // Dacă găsim resursa
+        if (m_piata.getResurse()[j] == resursa) 
         {
-            i = j; // Retinem indexul
-            break; // Ieșim din buclă
+            i = j; 
+            break; 
         }
     }
 
-    if (i == -1) // Dacă resursa nu a fost găsită
-    {
-        std::cout << "Eroare: Resursa " << resursa << " nu a fost gasita!" << std::endl;
-        return 0; // Returnăm 0 pentru a semnala că nu am găsit resursa
-    }
+    if (i == -1) return 0;
 
     double pretMaxim = m_piata.getMaxPret().at(i);
-
-    // Calculăm numărul de praguri de 10000 kg depășite
     double cantitateTotalaMinata = m_piata.getResursaMinata().at(i);
+    
+    // I calculate how many 10,000kg thresholds have been passed to determine the price drop.
     int numarPraguri = static_cast<int>(cantitateTotalaMinata / 10000);
-    double cantitateTotalaMinataFaraUltimaResursa = m_piata.getResursaMinata().at(i) - cantitateExtrasa;
-    int numarPraguriFaraUltimaResursa = static_cast<int>(cantitateTotalaMinataFaraUltimaResursa / 10000);
-    double profit = cantitateExtrasa * pretMaxim;
+    double cantitateAnterioara = cantitateTotalaMinata - cantitateExtrasa;
+    int numarPraguriAnterior = static_cast<int>(cantitateAnterioara / 10000);
+    
+    // I calculate the current price based on previous saturation.
+    double pretCurent = pretMaxim;
+    for(int k=0; k<numarPraguriAnterior; k++) pretCurent *= 0.9;
+    
+    // I ensure the price never drops below the minimum market price.
+    if(pretCurent < m_piata.getMinPret().at(i)) pretCurent = m_piata.getMinPret().at(i);
 
-    if (numarPraguri == numarPraguriFaraUltimaResursa)
-    {
-        for (int i = 0; i < numarPraguri; i++)
-        {
-            profit *= 0.9;
-        }
+    double profit = 0;
+    if (numarPraguri == numarPraguriAnterior) {
+        // If we haven't crossed a new threshold, the price remains stable for this batch.
+        profit = cantitateExtrasa * pretCurent;
+    } else {
+        // If we cross a threshold, I split the batch: part is sold at the old price, part at the new lower price.
+        double cantitatePanaLaPrag = (numarPraguriAnterior + 1) * 10000 - cantitateAnterioara;
+        profit += cantitatePanaLaPrag * pretCurent;
+        
+        double cantitateDupaPrag = cantitateExtrasa - cantitatePanaLaPrag;
+        double pretNou = pretCurent * 0.9;
+        if(pretNou < m_piata.getMinPret().at(i)) pretNou = m_piata.getMinPret().at(i);
+        profit += cantitateDupaPrag * pretNou;
     }
-    else
-    {
-        double multiplicator = 1;
-        for (int i = 0; i < numarPraguriFaraUltimaResursa; i++)
-        {
-            multiplicator *= 0.9;
-        }
-        double cantVandutaLaPretulMaiMic = numarPraguri * 10000 - (cantitateTotalaMinata - cantitateExtrasa);
-        profit = cantVandutaLaPretulMaiMic * pretMaxim * multiplicator;
-        multiplicator *= 0.9;
-        profit += (cantitateExtrasa - cantVandutaLaPretulMaiMic) * pretMaxim * multiplicator;
-    }
 
-    // Calculăm prețul actualizat
-
-    return profit;
+    return static_cast<int>(profit);
 }
 
-
+// Main Simulation Loop
 void Activitate::creareMisiuni()
 {
-    try 
+    if (m_asteroizi.empty() || m_rachete.empty()) return;
+
+    for (size_t i = 0; i < m_asteroizi.size(); i++) 
     {
-        if (m_asteroizi.empty())
+        bool continuare = true;
+        while (continuare)
         {
-            std::cerr << "Vectorul de asteroizi este gol." << std::endl;
-            return;
-        }
-
-        if (m_rachete.empty())
-        {
-            std::cerr << "Vectorul de rachete este gol." << std::endl;
-            return;
-        }
-
-        //std::cout << "Numar de asteroizi: " << m_asteroizi.size() << std::endl;
-        //std::cout << "Numar de rachete: " << m_rachete.size() << std::endl;
-
-        for (size_t i = 0; i < m_asteroizi.size(); i++) // parcurg vectorul de asteroizi
-        {
-            bool continuare = true;
-            while (continuare)
-            {
-                int profitBrut = 0;
-                Racheta& rachetaEficienta = alegereRacheta(i); // aleg cea mai eficienta racheta pentru asteroidul curent
-                double cantitateTotalaExtrasa = m_asteroizi.at(i).getRandamentExtractie() * m_asteroizi.at(i).getCantitateTotala() / 100; // calculez cantitatea extrasa de resurse
-                double cantitateExtrasa;
-                std::string resursa = m_asteroizi.at(i).getResursa(); // retin resursa extrasa
-
-                //std::cout << "Procesare asteroid ID: " << m_asteroizi[i].getId() << ", Resursa: " << resursa << std::endl;
-
-
-                double consumCombustibil = 2 * m_asteroizi.at(i).getDistanta() * rachetaEficienta.getConsumCombustibil() / 1000; // calculez consumul de combustibil
-                rachetaEficienta.setCombustibilDisponibil(rachetaEficienta.getCombustibilDisponibil() - consumCombustibil); // actualizez combustibilul disponibil
-
-                if (cantitateTotalaExtrasa > rachetaEficienta.getCapacitate()) // cantitatea extrasa este mai mare decat capacitatea rachetei
-                {
-                    cantitateExtrasa = rachetaEficienta.getCapacitate(); // cantitatea extrasa este egala cu capacitatea rachetei
-                    actualizareResursaMinata(resursa, cantitateExtrasa); // actualizez resursele minate
-                    actualizareCantitateTotalaAsteroid(i, cantitateExtrasa); // actualizez cantitatea totala de resurse
-                    profitBrut = calculPretResursaMinata(resursa, cantitateExtrasa);
-                    m_piata.getProfitBrut().at(i) += profitBrut; // actualizez profitul brut
-                }
-                else // cantitatea extrasa este mai mica decat capacitatea rachetei
-                {
-                    cantitateExtrasa = cantitateTotalaExtrasa; // cantitatea extrasa este egala cu cantitatea totala extrasa
-                    actualizareResursaMinata(resursa, cantitateExtrasa); // actualizez resursele minate
-
-                    actualizareCantitateTotalaAsteroid(i, cantitateExtrasa); // actualizez cantitatea totala de resurse
-                    profitBrut = calculPretResursaMinata(resursa, cantitateExtrasa);
-                    m_piata.getProfitBrut().at(i) += profitBrut; // actualizez profitul brut in piata
-
-                    // Verific daca asteroidul mai are resurse
-                    if (i + 1 < m_asteroizi.size() && m_asteroizi.at(i + 1).getId() == m_asteroizi.at(i).getId()) // Verific ca nu trec de ultimul asteroid si ca asteroidul urmator are acelasi id
-                    {
-                        bool ok = false;
-                        while (i + 1 < m_asteroizi.size() && cantitateTotalaExtrasa < rachetaEficienta.getCapacitate() && m_asteroizi.at(i + 1).getId() == m_asteroizi.at(i).getId()) // continuăm să extragem de pe același asteroid
-                        {
-                            // Schimbăm resursa pentru a mina resursa următoare de pe același asteroid
-                            if (m_asteroizi.at(i + 1).getResursa() != m_asteroizi.at(i).getResursa()) 
-                            {
-                                 resursa += "&" + m_asteroizi.at(i + 1).getResursa();  // Adăugăm resursa nouă la lista de resurse extrase
-                            }
-                        
-                        double temp = cantitateTotalaExtrasa;
-                        cantitateTotalaExtrasa += m_asteroizi.at(i + 1).getRandamentExtractie() * m_asteroizi.at(i + 1).getCantitateTotala() / 100; // calculăm cantitatea extrasa de resurse
-                        cantitateExtrasa = cantitateTotalaExtrasa - temp;
-                        actualizareResursaMinata(m_asteroizi.at(i + 1).getResursa(), cantitateExtrasa); // actualizăm resursele minate
-                        actualizareCantitateTotalaAsteroid(i + 1, cantitateExtrasa); // actualizăm cantitatea totală de resurse
-                        double profitBrut2 = calculPretResursaMinata(m_asteroizi.at(i + 1).getResursa(), cantitateExtrasa); // adăugăm la profitul brut
-                        m_piata.getProfitBrut().at(i + 1) += profitBrut2; // actualizăm profitul brut
-                        profitBrut += profitBrut2; // adăugăm la profitul brut
-        
-                        i++; // Trecem la următorul asteroid
-                        ok = true;
-                    }
-
-                        if (ok) // Am extras resurse de pe un alt asteroid
-                        {
-                            if (cantitateTotalaExtrasa > rachetaEficienta.getCapacitate())
-                            {
-                                cantitateExtrasa = rachetaEficienta.getCapacitate();
-                            }
-                            else
-                            {
-                                cantitateExtrasa = cantitateTotalaExtrasa;
-                                continuare = false; // Nu mai extragem resurse
-                            }
-                        }
-                    }
-                    else continuare = false; // Nu mai extragem resurse
-                }
-
-                int profitNet = profitBrut - consumCombustibil * rachetaEficienta.getPretCombustibil(); // calculez profitul net
-                double costCombustibil = consumCombustibil * rachetaEficienta.getPretCombustibil(); // calculez costul combustibilului
-                // Notez toate datele in misiune
-                Misiune newMisiune;
-                newMisiune.setIdRacheta(rachetaEficienta.getId());
-                newMisiune.setIdAsteroid(m_asteroizi.at(i).getId());
-                newMisiune.setResursa(resursa);
-                newMisiune.setCantitateExtrasa(cantitateExtrasa);
-                newMisiune.setCombustibilConsum(consumCombustibil);
-                newMisiune.setCostCombustibil(costCombustibil);
-                newMisiune.setProfitBrut(profitBrut);
-                newMisiune.setProfitNet(profitNet);
-                m_misiuni.push_back(newMisiune); // Adaugam misiunea in vectorul de misiuni
-
-                // Debug output
-                /*std::cout << "Misiune adaugata: ID Racheta: " << newMisiune.getIdRacheta()
-                          << ", ID Asteroid: " << newMisiune.getIdAsteroid()
-                          << ", Resursa: " << newMisiune.getResursa()
-                          << ", Cantitate Extrasa: " << newMisiune.getCantitateExtrasa()
-                          << ", Consum Combustibil: " << newMisiune.getCombustibilConsum()
-                          << ", Cost Combustibil: " << newMisiune.getCostCombustibil()
-                          << ", Profit Brut: " << newMisiune.getProfitBrut()
-                          << ", Profit Net: " << newMisiune.getProfitNet() << std::endl;*/
-
+            // I utilize the pointer check to safely handle fleet depletion.
+            Racheta* rachetaPtr = alegereRacheta(i);
+            if (rachetaPtr == nullptr) {
+                continuare = false; 
+                break; // Stop loop to avoid infinite cycle or crash if no rockets are available.
             }
+            Racheta& rachetaEficienta = *rachetaPtr;
+
+            int profitBrut = 0;
+            double cantitateTotalaExtrasa = m_asteroizi.at(i).getRandamentExtractie() * m_asteroizi.at(i).getCantitateTotala() / 100; 
+            
+            // I added a small threshold check to stop mining if resources are negligible.
+            if (cantitateTotalaExtrasa <= 0.001) {
+                continuare = false;
+                break;
+            }
+
+            double cantitateExtrasa;
+            std::string resursa = m_asteroizi.at(i).getResursa(); 
+
+            double consumCombustibil = 2.0 * m_asteroizi.at(i).getDistanta() * rachetaEficienta.getConsumCombustibil() / 1000.0; 
+            rachetaEficienta.setCombustibilDisponibil(rachetaEficienta.getCombustibilDisponibil() - consumCombustibil); 
+
+            // Logic to handle when the asteroid has more resources than the rocket can carry.
+            if (cantitateTotalaExtrasa > rachetaEficienta.getCapacitate()) 
+            {
+                cantitateExtrasa = rachetaEficienta.getCapacitate(); 
+                actualizareResursaMinata(resursa, cantitateExtrasa); 
+                actualizareCantitateTotalaAsteroid(i, cantitateExtrasa); 
+                profitBrut = calculPretResursaMinata(resursa, cantitateExtrasa);
+                
+                // I iterate to find the correct index to update gross profit, avoiding vector range errors.
+                for(size_t k=0; k<m_piata.getResurse().size(); ++k) {
+                    if(m_piata.getResurse()[k] == resursa) {
+                        m_piata.getProfitBrut().at(k) += profitBrut;
+                        break;
+                    }
+                }
+            }
+            else 
+            {
+                // Logic for when the rocket has more capacity than the asteroid has resources.
+                cantitateExtrasa = cantitateTotalaExtrasa; 
+                actualizareResursaMinata(resursa, cantitateExtrasa); 
+                actualizareCantitateTotalaAsteroid(i, cantitateExtrasa); 
+                profitBrut = calculPretResursaMinata(resursa, cantitateExtrasa);
+                
+                // Same fix here for vector range safety.
+                for(size_t k=0; k<m_piata.getResurse().size(); ++k) {
+                    if(m_piata.getResurse()[k] == resursa) {
+                        m_piata.getProfitBrut().at(k) += profitBrut;
+                        break;
+                    }
+                }
+
+                // I implemented a check to see if the rocket can continue to the next asteroid (if it's the same ID/Cluster).
+                if (i + 1 < m_asteroizi.size() && m_asteroizi.at(i + 1).getId() == m_asteroizi.at(i).getId()) 
+                {
+                    while (i + 1 < m_asteroizi.size() && cantitateExtrasa < rachetaEficienta.getCapacitate() && m_asteroizi.at(i + 1).getId() == m_asteroizi.at(i).getId()) 
+                    {
+                        // If mining a different resource type in the same cluster, I append it to the name.
+                        if (m_asteroizi.at(i + 1).getResursa() != m_asteroizi.at(i).getResursa()) {
+                             if(resursa.find(m_asteroizi.at(i+1).getResursa()) == std::string::npos)
+                                 resursa += "&" + m_asteroizi.at(i + 1).getResursa(); 
+                        }
+                    
+                        double capacitateRamasa = rachetaEficienta.getCapacitate() - cantitateExtrasa;
+                        double cantitateDisponibilaNext = m_asteroizi.at(i + 1).getRandamentExtractie() * m_asteroizi.at(i + 1).getCantitateTotala() / 100;
+                        
+                        double cantitateLuata = (cantitateDisponibilaNext > capacitateRamasa) ? capacitateRamasa : cantitateDisponibilaNext;
+                        
+                        if (cantitateLuata > 0) {
+                            actualizareResursaMinata(m_asteroizi.at(i + 1).getResursa(), cantitateLuata); 
+                            actualizareCantitateTotalaAsteroid(i + 1, cantitateLuata); 
+                            double profitBrut2 = calculPretResursaMinata(m_asteroizi.at(i + 1).getResursa(), cantitateLuata); 
+                            
+                            // I update profit for the specific resource index mined in the cluster.
+                            for(size_t k=0; k<m_piata.getResurse().size(); ++k) {
+                                if(m_piata.getResurse()[k] == m_asteroizi.at(i+1).getResursa()) {
+                                    m_piata.getProfitBrut().at(k) += profitBrut2;
+                                    break;
+                                }
+                            }
+                            profitBrut += profitBrut2; 
+                            cantitateExtrasa += cantitateLuata;
+                        }
+    
+                        // I move to the next asteroid segment if the current one is depleted.
+                        if(cantitateDisponibilaNext <= capacitateRamasa) i++; 
+                        else break; 
+                    }
+                }
+                continuare = false; 
+            }
+
+            int profitNet = profitBrut - consumCombustibil * rachetaEficienta.getPretCombustibil(); 
+            double costCombustibil = consumCombustibil * rachetaEficienta.getPretCombustibil(); 
+            
+            // I log the mission details.
+            Misiune newMisiune;
+            newMisiune.setIdRacheta(rachetaEficienta.getId());
+            newMisiune.setIdAsteroid(m_asteroizi.at(i).getId());
+            newMisiune.setResursa(resursa);
+            newMisiune.setCantitateExtrasa(cantitateExtrasa);
+            newMisiune.setCombustibilConsum(consumCombustibil);
+            newMisiune.setCostCombustibil(costCombustibil);
+            newMisiune.setProfitBrut(profitBrut);
+            newMisiune.setProfitNet(profitNet);
+            m_misiuni.push_back(newMisiune); 
         }
-    } 
-    catch (const std::exception& e) 
-    {
-        std::cerr << "A aparut o exceptie: " << e.what() << std::endl;
-    } 
-    catch (...) 
-    {
-        std::cerr << "A aparut o exceptie necunoscută." << std::endl;
     }
 }
 
+// Function to export mission logs to CSV.
 void Activitate::afisareMisiuni(const std::string& filePath) const
 {
     std::ofstream outFile(filePath);
-    if (!outFile.is_open())
-    {
-        std::cerr << "Nu s-a putut deschide fișierul pentru scriere: " << filePath << std::endl;
-        return;
-    }
+    if (!outFile.is_open()) return;
 
     outFile << "ID Rachetă;ID Asteroid;Resursă;Cantitate extrasă (kg);Combustibil consumat (kg);Cost combustibil ($);Profit brut ($);Profit net ($)\n";
-    for (size_t i = 0; i < m_misiuni.size(); i++)
+    for (const auto& misiune : m_misiuni)
     {
-        const Misiune& misiune = m_misiuni[i];
         outFile << misiune.getIdRacheta() << ";"
                 << misiune.getIdAsteroid() << ";"
                 << misiune.getResursa() << ";"
@@ -389,20 +330,16 @@ void Activitate::afisareMisiuni(const std::string& filePath) const
                 << misiune.getProfitBrut() << ";"
                 << misiune.getProfitNet() << "\n";
     }
-
     outFile.close();
 }
 
+// Function to generate the financial report and rocket ranking.
 void Activitate::afisareProfitTotalSiClasament(const std::string& filePath1, const std::string& filePath2)
 {
     std::ofstream outFile(filePath1);
-    if (!outFile.is_open())
-    {
-        std::cerr << "Nu s-a putut deschide fișierul pentru scriere: " << filePath1 << std::endl;
-        return;
-    }
+    if (!outFile.is_open()) return;
 
-    // Structură pentru a reține informațiile despre rachete pentru clasament
+    // Helper struct to aggregate data for the ranking system.
     struct RachetaInfo
     {
         std::string id;
@@ -410,24 +347,23 @@ void Activitate::afisareProfitTotalSiClasament(const std::string& filePath1, con
         int numarMisiuni;
         double eficienta;
     };
-
-    // Map pentru a reține informațiile despre rachete
     std::vector<RachetaInfo> racheteInfo;
 
     outFile << "ID Rachetă;Profit brut ($);Cost total combustibil ($);Profit net ($)\n";
-    for (size_t i = 0; i < m_rachete.size(); i++)
+    for (const auto& racheta : m_rachete)
     {
         double profitBrut = 0;
         double costTotalCombustibil = 0;
-        std::string id = m_rachete[i].getId();
+        std::string id = racheta.getId();
         int numarMisiuni = 0;
 
-        for (size_t j = 0; j < m_misiuni.size(); j++)
+        // I sum up results for each rocket across all missions.
+        for (const auto& misiune : m_misiuni)
         {
-            if (id == m_misiuni[j].getIdRacheta())
+            if (id == misiune.getIdRacheta())
             {
-                profitBrut += m_misiuni[j].getProfitBrut();
-                costTotalCombustibil += m_misiuni[j].getCostCombustibil();
+                profitBrut += misiune.getProfitBrut();
+                costTotalCombustibil += misiune.getCostCombustibil();
                 numarMisiuni++;
             }
         }
@@ -438,24 +374,18 @@ void Activitate::afisareProfitTotalSiClasament(const std::string& filePath1, con
                 << std::fixed << std::setprecision(0) << costTotalCombustibil << ";"
                 << std::fixed << std::setprecision(0) << profitNet << std::endl;
 
-        // Adăugăm informațiile în map
         racheteInfo.push_back({id, profitNet, numarMisiuni, numarMisiuni > 0 ? profitNet / numarMisiuni : 0.0});
 
     }
     outFile.close();
 
-    // Sortăm rachetele în funcție de eficiență
+    // I sort the rockets based on efficiency score (Profit / Missions).
     std::sort(racheteInfo.begin(), racheteInfo.end(), [](const RachetaInfo& a, const RachetaInfo& b) {
         return a.eficienta > b.eficienta;
     });
 
     std::ofstream clasamentFile(filePath2);
-
-    if (!clasamentFile.is_open())
-    {
-        std::cerr << "Nu s-a putut deschide fișierul pentru scriere: output/clasament_rachete.csv" << std::endl;
-        return;
-    }
+    if (!clasamentFile.is_open()) return;
 
     clasamentFile << "Loc;ID Racheta;Profit net ($);Numar misiuni;Scor eficienta\n";
     int loc = 1;
@@ -468,18 +398,14 @@ void Activitate::afisareProfitTotalSiClasament(const std::string& filePath1, con
                       << std::fixed << std::setprecision(0) << info.eficienta << "\n";
         loc++;
     }
-
     clasamentFile.close();
 }
 
+// Function to export per-resource profit stats.
 void Activitate::afisareProfitPeResursa(const std::string& filePath)
 {
     std::ofstream outFile(filePath);
-    if (!outFile.is_open())
-    {
-        std::cerr << "Nu s-a putut deschide fișierul pentru scriere: " << filePath << std::endl;
-        return;
-    }
+    if (!outFile.is_open()) return;
 
     outFile << "Resursă;Cantitate extrasă (kg);Profit brut ($)\n";
     for (size_t i = 0; i < m_piata.getResurse().size(); i++)
@@ -488,8 +414,5 @@ void Activitate::afisareProfitPeResursa(const std::string& filePath)
                 << m_piata.getResursaMinata()[i] << ";"
                 << m_piata.getProfitBrut()[i] << "\n";
     }
-
     outFile.close();
 }
-
-

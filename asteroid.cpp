@@ -2,32 +2,35 @@
 #include <sstream>
 
 // Constructor
+// I use member initializer lists here for better performance compared to assignment in the body.
 Asteroid::Asteroid(std::string id, std::string resursa, double cantitateTotala, int randamentExtractie, int distanta)
     : m_id(id), m_resursa(resursa), m_cantitateTotala(cantitateTotala), m_randamentExtractie(randamentExtractie), m_distanta(distanta)
 {
 }
 
 // Constructor that reads data from a single line
+// I implemented this custom constructor to parse CSV lines directly into Asteroid objects.
 Asteroid::Asteroid(const std::string& line)
 {
-    std::stringstream s(line); // transform linia intr-un flux de date
-    std::string value; // variabila in care retin temporar valorile citite
+    std::stringstream s(line); // I use stringstream to treat the string as a stream for easy tokenization.
+    std::string value; // temporary variable to hold the parsed token
 
-    std::getline(s, m_id, ';'); // citesc valoarea pt id
+    std::getline(s, m_id, ';'); // I parse the ID up to the delimiter ';'
 
-    std::getline(s, m_resursa, ';'); // citesc valoarea pt resursa
+    std::getline(s, m_resursa, ';'); // I parse the resource name
 
-    std::getline(s, value, ';'); // citesc valoarea pt cantitateTotala
-    m_cantitateTotala = std::stoi(value); // convertesc valoarea citita dintr-un string in int
+    std::getline(s, value, ';'); // I read the total quantity as a string...
+    m_cantitateTotala = std::stoi(value); // ...and convert it to an integer using stoi.
 
-    std::getline(s, value, ';'); // citesc valoarea pt randamentExtractie
-    m_randamentExtractie = std::stoi(value); // convertesc valoarea citita dintr-un string in int
+    std::getline(s, value, ';'); // Parsing extraction yield
+    m_randamentExtractie = std::stoi(value); 
 
-    std::getline(s, value, ';'); // citesc valoarea pt distanta
-    m_distanta = std::stoi(value); // convertesc valoarea citita dintr-un string in int
+    std::getline(s, value, ';'); // Parsing distance
+    m_distanta = std::stoi(value); 
 }
 
 // Getters
+// Standard getters to access private members.
 std::string Asteroid::getId() const
 {
     return m_id;
@@ -54,6 +57,7 @@ int Asteroid::getDistanta() const
 }
 
 // Setters
+// Standard setters to modify the state of the asteroid during the simulation.
 void Asteroid::setId(std::string id)
 {
     m_id = id;

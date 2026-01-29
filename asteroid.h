@@ -2,6 +2,7 @@
 #define ASTEROID_H
 #include <string>
 
+// I defined the Asteroid class to represent the target entities for the mining missions.
 class Asteroid
 {
 private:
@@ -14,6 +15,8 @@ private:
 public:
     // Constructors
     Asteroid(std::string id, std::string resursa, double cantitateTotala, int randamentExtractie, int distanta);
+    
+    // I added a constructor that accepts a raw string to facilitate CSV parsing.
     Asteroid(const std::string& line);
 
     // Getters
