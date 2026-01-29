@@ -94,7 +94,7 @@ bool Activitate::citireActivitate(const std::string& fileNameRachete, const std:
         {
             try
             {
-                Asteroid asteroid(linie); // creez un obiect de tip Asteroid cu datele citite din linia curenta
+                Asteroid asteroid(linie1); // creez un obiect de tip Asteroid cu datele citite din linia curenta
                 m_asteroizi.push_back(asteroid); // adaug asteroidul in vectorul de asteroizi
             }
             catch (const std::invalid_argument& e)
