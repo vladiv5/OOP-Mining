@@ -1,0 +1,12 @@
+
+*.exe
+*.o
+program
+
+output/
+
+
+.vscode/
+.idea/
+
+.DS_Store

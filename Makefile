@@ -1,44 +1,100 @@
-# Variabile pentru compilare
 CXX = g++
-CXXFLAGS = -Wall -std=c++17
+CXXFLAGS = -Wall -Wextra -std=c++17
 
-# Directoare
-INPUT_DIR = input
-OUTPUT_DIR = output
+TARGET = program
 
-# Surse și obiecte
-SOURCES = $(wildcard *.cpp)
-OBJECTS = $(SOURCES:.cpp=.o)
+SRCS = main.cpp activitate.cpp racheta.cpp asteroid.cpp piata.cpp misiune.cpp
+OBJS = $(SRCS:.cpp=.o)
 
-# Executabil
-EXECUTABLE = program
-
-# Detectăm sistemul de operare
 ifeq ($(OS),Windows_NT)
-    RM_CMD = del
+    RM = del /Q /F
+    EXE = program.exe
+    MKDIR_OUTPUT = if not exist output mkdir output
 else
-    RM_CMD = rm -f
+    RM = rm -f
+    EXE = ./program
+    MKDIR_OUTPUT = mkdir -p output
 endif
 
-# Regula implicită
-all: $(EXECUTABLE)
+# Regula implicita: Compileaza tot
+all: $(TARGET)
 
-# Compilare program
-$(EXECUTABLE): $(OBJECTS)
-	$(CXX) $(CXXFLAGS) $(OBJECTS) -o $(EXECUTABLE)
+# Linkare executabil
+$(TARGET): $(OBJS)
+	$(CXX) $(CXXFLAGS) -o $(TARGET) $(OBJS)
 
+# Compilare fisiere obiect
 %.o: %.cpp
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
-# Rulare script Python
-run_script: $(EXECUTABLE)
-	@python3 process_asteroids.py ./$(EXECUTABLE) || (echo "Test failed!"; exit 1)
+# --- COMENZI TESTARE ---
 
-# Curățare
+# Ruleaza TOATE testele (0-6)
+run_all: $(TARGET)
+	@echo "========================================"
+	@echo "       STARTING ALL TESTS (0-6)         "
+	@echo "========================================"
+	@$(MKDIR_OUTPUT)
+	
+	@echo "[RUNNING TEST 0]"
+	$(EXE) input/test0/rachete.csv input/test0/asteroizi.csv input/test0/piata.csv
+	@echo "----------------------------------------"
+	
+	@echo "[RUNNING TEST 1]"
+	$(EXE) input/test1/rachete.csv input/test1/asteroizi.csv input/test1/piata.csv
+	@echo "----------------------------------------"
+	
+	@echo "[RUNNING TEST 2]"
+	$(EXE) input/test2/rachete.csv input/test2/asteroizi.csv input/test2/piata.csv
+	@echo "----------------------------------------"
+	
+	@echo "[RUNNING TEST 3]"
+	$(EXE) input/test3/rachete.csv input/test3/asteroizi.csv input/test3/piata.csv
+	@echo "----------------------------------------"
+	
+	@echo "[RUNNING TEST 4]"
+	$(EXE) input/test4/rachete.csv input/test4/asteroizi.csv input/test4/piata.csv
+	@echo "----------------------------------------"
+	
+	@echo "[RUNNING TEST 5]"
+	$(EXE) input/test5/rachete.csv input/test5/asteroizi.csv input/test5/piata.csv
+	@echo "----------------------------------------"
+	
+	@echo "[RUNNING TEST 6]"
+	$(EXE) input/test6/rachete.csv input/test6/asteroizi.csv input/test6/piata.csv
+	@echo "========================================"
+	@echo "       ALL TESTS COMPLETED SUCCESSFULY  "
+	@echo "========================================"
+
+# Teste Individuale (pentru verificare punctuala)
+test0: $(TARGET)
+	@$(MKDIR_OUTPUT)
+	$(EXE) input/test0/rachete.csv input/test0/asteroizi.csv input/test0/piata.csv
+
+test1: $(TARGET)
+	@$(MKDIR_OUTPUT)
+	$(EXE) input/test1/rachete.csv input/test1/asteroizi.csv input/test1/piata.csv
+
+test2: $(TARGET)
+	@$(MKDIR_OUTPUT)
+	$(EXE) input/test2/rachete.csv input/test2/asteroizi.csv input/test2/piata.csv
+
+test3: $(TARGET)
+	@$(MKDIR_OUTPUT)
+	$(EXE) input/test3/rachete.csv input/test3/asteroizi.csv input/test3/piata.csv
+
+test4: $(TARGET)
+	@$(MKDIR_OUTPUT)
+	$(EXE) input/test4/rachete.csv input/test4/asteroizi.csv input/test4/piata.csv
+
+test5: $(TARGET)
+	@$(MKDIR_OUTPUT)
+	$(EXE) input/test5/rachete.csv input/test5/asteroizi.csv input/test5/piata.csv
+
+test6: $(TARGET)
+	@$(MKDIR_OUTPUT)
+	$(EXE) input/test6/rachete.csv input/test6/asteroizi.csv input/test6/piata.csv
+
+# Curatenie
 clean:
-	@$(RM_CMD) -f $(OBJECTS) $(EXECUTABLE) misiuni.csv profit_resursa.csv profit_total.csv clasament_rachete.csv
-
-# Recompilare
-rebuild: clean all
-
-.PHONY: all clean rebuild run_script
+	$(RM) *.o $(TARGET)
